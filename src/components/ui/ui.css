@@ -1,0 +1,109 @@
+/* Modern UI primitives using CSS variables from src/index.css */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  border: none;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(2px); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+
+.btn-primary { background: linear-gradient(135deg, var(--color-accent), #6a38f0); }
+.btn-secondary { background: linear-gradient(135deg, #26c6da, #00acc1); }
+.btn-danger { background: linear-gradient(135deg, #ef5350, #e53935); }
+
+.btn-sm { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+.btn-md { padding: 0.75rem 1rem; font-size: 1rem; }
+.btn-lg { padding: 1rem 1.25rem; font-size: 1.05rem; }
+
+.card {
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.06);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.navbar-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.75rem 1rem;
+}
+.navbar-modern .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.navbar-modern .menu-btn {
+  position: absolute;
+  left: 12px;
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 280px;
+  background: linear-gradient(to bottom, #0a0f3c, #1a237e);
+  color: #fff;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 8px 0 24px rgba(0,0,0,0.4);
+}
+
+/* Inputs */
+.input-modern {
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 24px;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.9);
+  color: #222;
+  box-shadow: var(--shadow);
+}
+.input-modern::placeholder { color: #666; }
+
+.page-shell {
+  min-height: 100vh;
+  width: 92vw;
+  max-width: 375px;
+  max-height: 812px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.page-hero {
+  border-radius: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #9a6bff, #6a38f0);
+  color: #fff;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-hero .title {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+.page-content { margin-top: 14px; }

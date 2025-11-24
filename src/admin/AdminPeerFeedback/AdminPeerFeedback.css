@@ -1,0 +1,210 @@
+/* ---------------- MAIN LAYOUT ---------------- */
+.pf-main {
+  padding: 40px;
+  color: white;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* ---------------- TOPBAR ---------------- */
+.pf-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.pf-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* SEARCH BOX */
+.pf-search {
+  background: rgba(255,255,255,0.10);
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+}
+
+.pf-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  width: 100%;
+}
+
+/* SORT DROPDOWN */
+.pf-sort {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+/* TOPBAR ICON BUTTONS — FIXED BIGGER */
+.icon-btn {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.icon-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+  color: white;
+}
+
+/* ---------------- FEEDBACK LIST ---------------- */
+.feedback-list {
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* FEEDBACK CARD */
+.feedback-card {
+  background: rgba(12, 12, 32, 0.75);
+  padding: 26px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* HEADER */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pf-student {
+  opacity: 0.85;
+  font-size: 15px;
+}
+
+/* ACTION BUTTONS */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.act {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.act svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+.act-view { background: #726bff; }
+.act-approve { background: #22b86c; }
+.act-delete { background: #ff6b6b; }
+
+/* FOOTER */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.stars {
+  color: gold;
+  font-size: 18px;
+}
+
+.date {
+  opacity: 0.85;
+}
+
+/* ---------------- MODALS ---------------- */
+.pf-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pf-modal {
+  background: #111;
+  padding: 32px;
+  border-radius: 20px;
+  width: 500px;
+  color: white;
+}
+
+.pf-close {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #6c63ff;
+  border: none;
+  border-radius: 10px;
+  color: white;
+}
+
+/* DELETE MODAL */
+.pf-delete-modal {
+  background: #1a0b0b;
+  padding: 30px;
+  border-radius: 18px;
+  width: 420px;
+  color: white;
+}
+
+.delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel,
+.confirm {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel { background: gray; }
+.confirm { background: #ff4c4c; color: white; }

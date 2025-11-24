@@ -1,0 +1,173 @@
+/* File: src/StudentProfile/StudentProgress.css */
+
+/* Theme variables */
+:root {
+  --bg-a: #2b1a7f;
+  --bg-b: #4b2bd6;
+  --muted: rgba(255,255,255,0.75);
+  --card: rgba(255,255,255,0.04);
+  --accent: #22c55e;
+  --text: #e8e6ff;
+}
+
+/* base page */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text);
+}
+
+/* layout */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(10,8,40,0.95), rgba(26,16,80,0.95));
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-header {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.sidebar-logo { width: 36px; height:36px; object-fit:contain; border-radius:6px; }
+.sidebar-title { font-weight:700; font-size:16px; color:var(--text); }
+.sidebar-menu {
+  list-style:none;
+  padding:0;
+  margin: 8px 0;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.sidebar-menu li {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  cursor:pointer;
+  color:var(--text);
+  opacity:0.95;
+}
+.sidebar-menu li.active { font-weight:700; color:var(--text); }
+.menu-icon { font-size:20px; }
+
+/* main content */
+.main-content {
+  flex: 1;
+  padding: 28px 48px;
+  box-sizing: border-box;
+  overflow:auto;
+}
+
+/* top controls */
+.progress-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+.left-controls { display:flex; gap:12px; align-items:center; }
+.back-btn {
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+  color:var(--text);
+}
+.right-controls { display:flex; gap:12px; align-items:center; }
+.last-login { font-size:0.95rem; opacity:0.95; }
+.export-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* student header */
+.student-header-card {
+  display:flex;
+  gap:24px;
+  align-items:center;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+.header-left { display:flex; align-items:center; gap:18px; }
+.avatar-large { width:96px; height:96px; border-radius:12px; object-fit:cover; border:3px solid rgba(255,255,255,0.12); }
+.student-name { margin:0; font-size:1.4rem; font-weight:700; }
+.student-sub { opacity:0.95; font-size:0.95rem; }
+
+/* header right */
+.header-right { margin-left:auto; display:flex; flex-direction:column; gap:12px; align-items:flex-end; }
+.quick-stats { display:flex; gap:12px; align-items:center; }
+.stat.small { min-width:140px; padding:10px 12px; border-radius:10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03); text-align:center; }
+.stat-label { font-size:0.85rem; opacity:0.9; }
+.stat-value { font-size:1.3rem; font-weight:700; margin-top:6px; }
+.stat-sub { font-size:0.85rem; opacity:0.9; margin-top:6px; }
+
+/* progress */
+.level-progress { width: 340px; }
+.progress-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.progress-label { font-size:0.9rem; opacity:0.9; }
+.progress-bar { background: rgba(255,255,255,0.04); height:12px; border-radius:8px; overflow:hidden; }
+.progress-fill { height:100%; background: linear-gradient(90deg,#8ef7a6,#2dd4bf); transition: width 600ms ease; }
+
+/* dashboard cards */
+.dashboard-block { margin-top:18px; }
+.cards-row { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+.metric-card { flex:1; min-width:220px; background: rgba(255,255,255,0.03); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
+.metric-title { font-size:0.95rem; opacity:0.95; margin-bottom:8px; }
+.metric-big { font-size:1.6rem; font-weight:700; }
+.metric-sub { margin-top:8px; opacity:0.9; font-size:0.9rem; }
+
+/* lower cards */
+.cards-row.lower { margin-top:6px; }
+.wide-card { flex:1; min-width:300px; background: rgba(255,255,255,0.03); padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
+.wide-title { font-weight:700; margin-bottom:12px; }
+.mini-tests { display:flex; flex-direction:column; gap:8px; }
+.mini-test { display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:10px; background: rgba(255,255,255,0.02); }
+.mt-name { font-weight:600; }
+.mt-score { font-weight:700; }
+
+/* snapshot */
+.snapshot-img { width:100%; height:120px; object-fit:cover; border-radius:8px; opacity:0.95; }
+
+/* info & logs */
+.info-and-logs { display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:24px; }
+.info-box { background: rgba(255,255,255,0.03); padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
+.logs-panel { background: rgba(255,255,255,0.02); padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
+.logs-list { display:flex; flex-direction:column; gap:10px; }
+.log-item { display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:10px; background: rgba(255,255,255,0.015); }
+
+/* small helpers */
+.achievement { background: rgba(255,255,255,0.04); padding:6px 10px; border-radius:10px; margin-right:8px; display:inline-block; }
+.muted { opacity:0.85; color: rgba(255,255,255,0.85); }
+
+/* responsive */
+@media (max-width: 1100px) {
+  .header-right { align-items:flex-start; }
+  .cards-row { flex-direction:column; }
+  .cards-row.lower { flex-direction:column; }
+  .info-and-logs { grid-template-columns: 1fr; }
+  .sidebar { display:none; }
+  .main-content { padding:18px; }
+}

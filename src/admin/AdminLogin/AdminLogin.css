@@ -1,0 +1,96 @@
+/* ======================================================
+   ADMIN LOGIN PAGE ONLY
+====================================================== */
+
+:root {
+  --bg-a: #0d0b52;
+  --bg-b: #5a2dfd;
+}
+
+/* BACKGROUND */
+.admin-login-page {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* LOGIN CARD */
+.admin-login-card {
+  width: 420px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+/* IMAGE */
+.admin-login-img {
+  width: 160px;
+  margin-bottom: 20px;
+}
+
+/* TITLE */
+.admin-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 25px;
+}
+
+/* INPUT WRAPPER */
+.admin-input-wrapper {
+  position: relative;
+  width: 85%;
+  margin-bottom: 16px;
+}
+
+/* INPUT FIELD */
+.admin-input {
+  width: 90%;
+  padding: 14px 50px 14px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.admin-input::placeholder {
+  color: #e6e6e6;
+}
+
+/* SHOW/HIDE ICON */
+.show-password {
+  position: absolute;
+  right: 0.5px;
+  top: 60%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #e6e6e6;
+  cursor: pointer;
+}
+
+/* LOGIN BUTTON */
+.admin-btn {
+  width: 40%;
+  padding: 14px;
+  background: linear-gradient(90deg, #8a63ff, #6a4bff);
+  border-radius: 12px;
+  border: none;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
