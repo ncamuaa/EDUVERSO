@@ -7,18 +7,43 @@ import logo from "../../assets/2logo.png";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");       // FIXED: email instead of username
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (username === "admin" && password === "admin123") {
+    try {
+      const response = await fetch("http://localhost:5001/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),  // FIXED: send email, not username
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid email or password");
+        return;
+      }
+
+      // ONLY ALLOW ADMINS
+      if (data.user.role !== "admin") {
+        setError("Access denied — you are not an admin.");
+        return;
+      }
+
+      // SAVE ADMIN SESSION
       localStorage.setItem("admin_logged_in", "true");
+      localStorage.setItem("admin_email", data.user.email);
+
       navigate("/dashboard");
-    } else {
-      alert("Invalid admin credentials");
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again.");
     }
   };
 
@@ -39,15 +64,17 @@ export default function AdminLogin() {
 
         <h2 className="admin-title">Admin Login</h2>
 
+        {error && <p className="error-msg">{error}</p>}
+
         <form onSubmit={handleLogin}>
-          {/* Username */}
+          {/* Email */}
           <div className="admin-input-wrapper">
             <input
-              type="text"
-              placeholder="Username"
+              type="email"
+              placeholder="Email"
               className="admin-input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -69,7 +96,7 @@ export default function AdminLogin() {
             </span>
           </div>
 
-          {/* Button */}
+          {/* Login Button */}
           <button type="submit" className="admin-btn">
             Login
           </button>

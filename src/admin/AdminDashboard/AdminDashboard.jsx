@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from "react";
+// src/pages/Admin/AdminDashboard.jsx
+import React, { useEffect, useState, useRef } from "react";
+
 import { motion } from "framer-motion";
 
 import {
   LuLayoutDashboard,
   LuUsers,
   LuBookOpen,
-  LuBrain,
-  LuMessageSquare,
-  LuMegaphone,
   LuSettings,
   LuLogOut,
+  LuMessageSquare,
+  LuBrain,
+  LuMegaphone,
 } from "react-icons/lu";
 
 import { FaBell, FaMoon, FaSun, FaBars } from "react-icons/fa";
 import { AiOutlineUser } from "react-icons/ai";
+import { LuGamepad2 } from "react-icons/lu";
+
 
 import {
   AreaChart,
@@ -27,214 +31,300 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import { getStudentStats } from "../../data/stats";
 import logo from "../../assets/1logo.png";
 import "./AdminDashboard.css";
 
-const sampleXPTrend = [
-  { date: "Mon", xp: 120 },
-  { date: "Tue", xp: 200 },
-  { date: "Wed", xp: 150 },
-  { date: "Thu", xp: 240 },
-  { date: "Fri", xp: 300 },
-  { date: "Sat", xp: 250 },
-  { date: "Sun", xp: 280 },
-];
+const API_BASE = "http://192.168.100.180:5001";
 
-const sampleUsage = [
-  { module: "Modules", value: 420 },
-  { module: "Quiz Arena", value: 260 },
-  { module: "Peer Feedback", value: 190 },
-  { module: "Announcements", value: 120 },
-];
 
-function StatCard({ title, value, icon }) {
-  return (
-    <motion.div className="stat-card" whileHover={{ scale: 1.03 }}>
-      <div className="stat-icon">{icon}</div>
-      <div>
-        <div className="stat-title">{title}</div>
-        <div className="stat-value">{value}</div>
-      </div>
-    </motion.div>
-  );
-}
+const safe = (v) => (Number.isFinite(v) ? v : 0);
 
 export default function AdminDashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [dark, setDark] = useState(true);
 
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [activeToday, setActiveToday] = useState(0);
+  const [avgXP, setAvgXP] = useState(0);
+  const [completion, setCompletion] = useState(0);
+
+  const [xpTrend, setXpTrend] = useState([]);
+  const [moduleUsage, setModuleUsage] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const pollRef = useRef(null);
+
+  // Protect route
   useEffect(() => {
     if (localStorage.getItem("admin_logged_in") !== "true") {
       window.location.href = "/login";
     }
   }, []);
 
+  // dark mode class toggle
   useEffect(() => {
     document.documentElement.classList.toggle("admin-dark", dark);
   }, [dark]);
 
-  // GLOBAL STUDENT STATS
-  const { total, avgXP, activeToday, completion } = getStudentStats();
+  const handleLogout = () => {
+    localStorage.removeItem("admin_logged_in");
+    window.location.href = "/login";
+  };
+
+  const fetchJson = async (url) => {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(url);
+    return r.json();
+  };
+
+  async function loadStats() {
+    setLoading(true);
+    try {
+      const [
+        total,
+        active,
+        avg,
+        comp,
+        trend,
+        usage,
+      ] = await Promise.all([
+        fetchJson(`${API_BASE}/admin/total-students`).catch(() => ({ total: 0 })),
+        fetchJson(`${API_BASE}/admin/active-today`).catch(() => ({ activeToday: 0 })),
+        fetchJson(`${API_BASE}/admin/average-xp`).catch(() => ({ avgXP: 0 })),
+        fetchJson(`${API_BASE}/admin/completion`).catch(() => ({ completion: 0 })),
+        fetchJson(`${API_BASE}/admin/xp-trend`).catch(() => ({ trend: [] })),
+        fetchJson(`${API_BASE}/admin/module-usage`).catch(() => ({ usage: [] })),
+      ]);
+
+      setTotalStudents(safe(total.total));
+      setActiveToday(safe(active.activeToday));
+      setAvgXP(safe(avg.avgXP));
+      setCompletion(safe(comp.completion));
+
+      setXpTrend(trend.trend || []);
+      setModuleUsage(usage.usage || []);
+    } catch (err) {
+      console.error("DASHBOARD ERROR:", err);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadStats();
+    pollRef.current = setInterval(loadStats, 30000);
+    return () => clearInterval(pollRef.current);
+  }, []);
+
+  const xpTrendData =
+    xpTrend.length > 0
+      ? xpTrend
+      : [
+          { date: "Mon", xp: 120 },
+          { date: "Tue", xp: 180 },
+          { date: "Wed", xp: 160 },
+          { date: "Thu", xp: 220 },
+          { date: "Fri", xp: 260 },
+        ];
+
+  const moduleUsageData =
+    moduleUsage.length > 0
+      ? moduleUsage
+      : [
+          { module: "Modules", value: 320 },
+          { module: "Quiz Arena", value: 200 },
+          { module: "Peer FB", value: 160 },
+          { module: "Announcements", value: 110 },
+        ];
+
+  const StatCard = ({ title, value, icon }) => (
+    <motion.div className="adm-stat-card" whileHover={{ scale: 1.03 }}>
+      <div className="adm-stat-icon">{icon}</div>
+      <div>
+        <div className="adm-stat-title">{title}</div>
+        <div className="adm-stat-value">{value}</div>
+      </div>
+    </motion.div>
+  );
 
   return (
     <div className={`admin-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
-
-      {/* SIDEBAR */}
+      {/* Sidebar open floating button (shown when collapsed) */}
       {sidebarCollapsed && (
-        <button className="sidebar-open-btn" onClick={() => setSidebarCollapsed(false)}>
+        <button
+          className="sidebar-open-btn"
+          onClick={() => setSidebarCollapsed(false)}
+        >
           <FaBars />
         </button>
       )}
 
-      <motion.aside className="sidebar" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      {/* SIDEBAR (copied style from AdminAnnouncements) */}
+      <aside className="sidebar">
         <div className="sidebar-top">
           <div className="sidebar-header">
             <img src={logo} className="sidebar-logo" alt="logo" />
             <span className="sidebar-title">EduVerso Admin</span>
           </div>
 
-          <button className="sidebar-collapse-btn" onClick={() => setSidebarCollapsed((s) => !s)}>
+          <button
+            className="sidebar-collapse-btn"
+            onClick={() => setSidebarCollapsed((p) => !p)}
+          >
             <FaBars />
           </button>
         </div>
 
-        <ul className="sidebar-menu">
-          <li onClick={() => (window.location.href = "/dashboard")}>
-            <LuLayoutDashboard className="menu-icon" />
-            <span className="menu-text">Dashboard</span>
-          </li>
+       <ul className="sidebar-menu">
+  <li
+    className="active"
+    onClick={() => (window.location.href = "/dashboard")}
+  >
+    <LuLayoutDashboard className="menu-icon" /> Dashboard
+  </li>
 
-          <li onClick={() => (window.location.href = "/students")}>
-            <LuUsers className="menu-icon" />
-            <span className="menu-text">Students</span>
-          </li>
+  <li onClick={() => (window.location.href = "/students")}>
+    <LuUsers className="menu-icon" /> Students
+  </li>
 
-          {/* ⭐ UPDATED — now navigates to AdminModules */}
-          <li onClick={() => (window.location.href = "/admin-modules")}>
-            <LuBookOpen className="menu-icon" />
-            <span className="menu-text">Modules</span>
-          </li>
+  <li onClick={() => (window.location.href = "/admin-modules")}>
+    <LuBookOpen className="menu-icon" /> Modules
+  </li>
 
-          <li><LuBrain className="menu-icon" /><span className="menu-text">Quiz Arena</span></li>
-          <li onClick={() => (window.location.href = "/admin-peerfeedback")}>
-  <LuMessageSquare className="menu-icon" />
-  <span className="menu-text">Peer Feedback</span>
-</li>
+  {/* ✅ FIXED: GAMES ARENA */}
+  <li onClick={() => (window.location.href = "/admin-games")}>
+    <LuGamepad2 className="menu-icon" /> Games Arena
+  </li>
 
-         <li onClick={() => (window.location.href = "/admin-announcements")}>
-  <LuMegaphone className="menu-icon" />
-  <span className="menu-text">Announcements</span>
-</li>
 
-          <div className="spacer" />
 
-          <li onClick={() => (window.location.href = "/admin-settings")}>
-            <LuBookOpen className="menu-icon" />
-            <span className="menu-text">Setting</span>
-          </li>
-          <li className="logout"><LuLogOut className="menu-icon" /><span className="menu-text">Logout</span></li>
-        </ul>
-      </motion.aside>
+  <li onClick={() => (window.location.href = "/admin-peerfeedback")}>
+    <LuMessageSquare className="menu-icon" /> Peer Feedback
+  </li>
 
-      {/* MAIN CONTENT */}
-      <main className="main-content">
-        <div className="main-inner">
+  <li onClick={() => (window.location.href = "/admin-announcements")}>
+    <LuMegaphone className="menu-icon" /> Announcements
+  </li>
 
+  <div className="spacer"></div>
+
+  <li onClick={() => (window.location.href = "/admin-settings")}>
+    <LuSettings className="menu-icon" /> Settings
+  </li>
+
+  <li className="logout" onClick={handleLogout}>
+    <LuLogOut className="menu-icon" /> Logout
+  </li>
+</ul>
+
+      </aside>
+
+      {/* MAIN CONTENT (keeps previous dashboard layout) */}
+      <main className="admin-ann-container">
+        <div className="ann-main-box-dashboard">
           {/* TOPBAR */}
-          <header className="topbar">
-            <div className="search-bar">
-              <svg width="18" height="18" className="search-icon" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
-                <line x1="20" y1="20" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
-              </svg>
-              <input placeholder="Search anything..." />
-            </div>
-
-            <div className="floating-actions">
-              <button className="icon-btn" onClick={() => setNotifOpen(!notifOpen)}>
+          <div className="ann-top-row" style={{ justifyContent: "flex-end", gap: 12 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <button
+                className="icon-btn"
+                onClick={() => setNotifOpen((x) => !x)}
+                aria-label="notifications"
+              >
                 <FaBell />
               </button>
 
-              <button className="icon-btn" onClick={() => setDark(!dark)}>
+              <button
+                className="icon-btn"
+                onClick={() => setDark((x) => !x)}
+                aria-label="toggle-theme"
+              >
                 {dark ? <FaMoon /> : <FaSun />}
               </button>
 
-              <button className="icon-btn"><AiOutlineUser /></button>
+              <button className="icon-btn" aria-label="user">
+                <AiOutlineUser />
+              </button>
             </div>
+          </div>
 
-            {notifOpen && (
-              <motion.div className="notif-panel" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h4>Notifications</h4>
-                <p>New student joined: Maria</p>
-              </motion.div>
-            )}
-          </header>
+          {/* DASHBOARD INNER */}
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
+              {/* LEFT COLUMN */}
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                  <StatCard title="Total Students" value={loading ? "…" : totalStudents} icon={<LuUsers />} />
+                  <StatCard title="Active Today" value={loading ? "…" : activeToday} icon={<LuBrain />} />
+                  <StatCard title="Average XP" value={loading ? "…" : avgXP} icon={<LuBookOpen />} />
+                  <StatCard title="Completion" value={loading ? "…" : `${completion}%`} icon={<LuSettings />} />
+                </div>
 
-          {/* STATS */}
-          <section className="dashboard-grid">
-            <div className="left-grid">
-              <div className="stats-row">
-                <StatCard title="Total Students" value={total} icon={<LuUsers />} />
-                <StatCard title="Active Today" value={activeToday} icon={<LuBrain />} />
-                <StatCard title="Avg XP" value={avgXP} icon={<LuMessageSquare />} />
-                <StatCard title="Completion" value={`${completion}%`} icon={<LuSettings />} />
+                <div style={{ marginTop: 18, background: "rgba(255,255,255,0.04)", padding: 18, borderRadius: 12 }}>
+                  <h3 style={{ margin: 0 }}>📌 System Overview</h3>
+                  <p style={{ marginTop: 8, color: "rgba(255,255,255,0.8)" }}>
+                    High-level metrics for activity, XP growth and module usage.
+                  </p>
+                </div>
+
+                <div style={{ marginTop: 18, background: "rgba(255,255,255,0.04)", padding: 18, borderRadius: 12 }}>
+                  <h3 style={{ margin: 0 }}>📖 Module Performance Summary</h3>
+                  <p style={{ marginTop: 8, color: "rgba(255,255,255,0.8)" }}>
+                    See which modules have the highest engagement.
+                  </p>
+                </div>
               </div>
 
-              <div className="two-cards">
-                <div className="info-card">
-                  <h3>📊 Admin Overview</h3>
-                  <p>Manage users, announcements & analytics.</p>
-                  <div className="info-actions">
-                    <button onClick={() => (window.location.href = "/students")}>
-                      View students
-                    </button>
-                    <button>Make announcement</button>
+              {/* RIGHT COLUMN - charts */}
+              <div>
+                <div style={{ marginBottom: 18, background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 12 }}>
+                  <h4 style={{ margin: 0 }}>XP Trend</h4>
+                  <div style={{ height: 220, marginTop: 8 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={xpTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="xp" stroke="#8f63ff" fill="#8f63ff33" />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="info-card">
-                  <h3>🧩 Platform Insights</h3>
-                  <p>Detailed module and activity insights.</p>
+                <div style={{ background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 12 }}>
+                  <h4 style={{ margin: 0 }}>Module Usage</h4>
+                  <div style={{ height: 220, marginTop: 8 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={moduleUsageData}>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                        <XAxis dataKey="module" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="value" fill="#9b5bff" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
-
-              <div className="wide-card">
-                <h3>🎓 Student Progress Monitor</h3>
-                <p>Track XP, modules, and completed tasks.</p>
-              </div>
             </div>
-
-            <div className="right-grid">
-              <div className="chart-card">
-                <h4>XP Trend (7 days)</h4>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={sampleXPTrend}>
-                    <Area type="monotone" dataKey="xp" stroke="#9c7cff" fill="#9c7cff33" />
-                    <XAxis dataKey="date" /><YAxis /><Tooltip />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="chart-card">
-                <h4>Module usage (weekly)</h4>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={sampleUsage}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="module" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#8f63ff" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-            </div>
-          </section>
-
+          </div>
         </div>
+
+        {/* optional notif panel */}
+        {notifOpen && (
+          <motion.div
+            className="ann-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ position: "fixed", right: 36, top: 96, width: 320, zIndex: 1200 }}
+          >
+            <div style={{ background: "#0b0b16", padding: 12, borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h4 style={{ margin: 0 }}>Notifications</h4>
+              <p style={{ marginTop: 8 }}>No new notifications</p>
+            </div>
+          </motion.div>
+        )}
       </main>
     </div>
   );
 }
+

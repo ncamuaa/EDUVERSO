@@ -1,294 +1,415 @@
-// File: src/StudentProfile/StudentProgress.jsx
+// src/pages/Admin/StudentDetails.jsx
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+
 import {
   LuLayoutDashboard,
   LuUsers,
   LuBookOpen,
-  LuBrain,
+  LuGamepad,
   LuMessageSquare,
   LuMegaphone,
   LuSettings,
   LuLogOut,
 } from "react-icons/lu";
-import "./StudentDetails.css";
+
+import { FaBars, FaEdit, FaTrash } from "react-icons/fa";
+
 import logo1 from "../../assets/1logo.png";
+import noAvatar from "../../assets/no-avatar.png";
 
-// local uploaded screenshot (will be transformed to URL by your environment)
-const previewSnapshot = "/mnt/data/Screenshot 2025-11-22 at 11.05.10 AM.png";
+import "./StudentDetails.css";
+const API_BASE = "http://192.168.100.180:5001";
 
-export default function StudentProgress() {
+
+export default function StudentDetails() {
   const navigate = useNavigate();
-  const { state: student } = useLocation();
-  const [logs, setLogs] = useState([]);
+  const { state: studentFromNav } = useLocation();
+
+  const [student, setStudent] = useState(studentFromNav || null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // edit modal
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    id: "",
+    fullname: "",
+    email: "",
+    password: "",
+    xp: 0,
+    streak: 0,
+    avatar: "",
+    avatarFile: null,
+  });
 
   useEffect(() => {
-    if (!student) return;
-    // auto-refresh logs (reads activityLogs from localStorage)
-    const interval = setInterval(() => {
-      const allLogs = JSON.parse(localStorage.getItem("activityLogs")) || {};
-      setLogs(allLogs[student.username] || []);
-    }, 1000);
-    return () => clearInterval(interval);
+    if (localStorage.getItem("admin_logged_in") !== "true") {
+      window.location.href = "/login";
+    }
+  }, []);
+
+  // if navigated without state, fetch by URL id
+  useEffect(() => {
+    async function fetchIfNeeded() {
+      if (student) {
+        setForm({
+          id: student.id,
+          fullname: student.fullname || "",
+          email: student.email || "",
+          password: "",
+          xp: student.xp || 0,
+          streak: student.streak || 0,
+          avatar: student.avatar || "",
+          avatarFile: null,
+        });
+        return;
+      }
+
+      // attempt to parse id from url
+      const path = window.location.pathname.split("/");
+      const id = path[path.length - 1];
+      if (!id) return;
+
+      try {
+        const r = await fetch(`${BASE}/students/${id}`);
+        if (!r.ok) throw new Error("Failed to fetch student");
+        const data = await r.json();
+        if (data.student) {
+          setStudent(data.student);
+          setForm({
+            id: data.student.id,
+            fullname: data.student.fullname || "",
+            email: data.student.email || "",
+            password: "",
+            xp: data.student.xp || 0,
+            streak: data.student.streak || 0,
+            avatar: data.student.avatar || "",
+            avatarFile: null,
+          });
+        } else {
+          setStudent(null);
+        }
+      } catch (err) {
+        console.error("FETCH STUDENT ERROR:", err);
+      }
+    }
+
+    fetchIfNeeded();
   }, [student]);
 
   if (!student) {
-    return (
-      <div style={{ padding: 40, color: "#fff" }}>
-        <h2>Student not found</h2>
-      </div>
-    );
+    return <h2 style={{ padding: 40, color: "#fff" }}>No student selected.</h2>;
   }
 
-  // helpers / mock derived stats (replace with real logic if you have it)
-  const percent = (a, b) => (b === 0 ? 0 : Math.round((a / b) * 100));
-  const formatDate = (ts) => (ts ? new Date(ts).toLocaleString() : "—");
+  const level = Math.floor((student.xp || 0) / 100) + 1;
+  const progressPercent = Math.round(((student.xp % 100) / 100) * 100);
 
-  const xpToday = student.xpToday ?? 0;
-  const xpWeek = student.xpWeek ?? 0;
-  const xpToNext = student.xpToNext ?? Math.max(1000 - (student.xp % 1000), 100);
-  const completion = student.completion ?? 0;
-  const timeThisWeek = student.timeThisWeek ?? 0;
+  /* ---------- avatar upload helper ---------- */
+  const uploadAvatar = async (file, userId = null) => {
+    if (!file) return null;
+    try {
+      const fd = new FormData();
+      fd.append("avatar", file);
+      if (userId) fd.append("id", userId);
+      const r = await fetch(`${BASE}/students/upload-avatar`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!r.ok) throw new Error("Upload failed");
+      const data = await r.json();
+      return data.avatar;
+    } catch (err) {
+      console.error("UPLOAD ERROR:", err);
+      alert("Avatar upload failed");
+      return null;
+    }
+  };
 
-  const levelProgressPercent = percent(student.xp % 1000, 1000);
-
-  const exportLogs = () => {
-    let csv = "Type,Info,Value,Timestamp\n";
-    logs.forEach((log) => {
-      const ts = log.timestamp || "";
-      if (log.type === "login") csv += `login,,,"${ts}"\n`;
-      if (log.type === "logout")
-        csv += `logout,Session Duration,${log.duration} min,"${ts}"\n`;
-      if (log.type === "micro_lesson")
-        csv += `micro_lesson,Lesson ${log.lessonId},"Score ${log.score}, XP ${log.xpEarned}","${ts}"\n`;
-      if (log.type === "module_start")
-        csv += `module_start,Module ${log.moduleId},Started,"${ts}"\n`;
-      if (log.type === "module_progress")
-        csv += `module_progress,Module ${log.moduleId},"Page ${log.currentPage}/${log.totalPages} (${log.percent}%)","${ts}"\n`;
-      if (log.type === "module_end")
-        csv += `module_end,Module ${log.moduleId},"Duration ${log.duration} min","${ts}"\n`;
+  const openEdit = () => {
+    setForm({
+      id: student.id,
+      fullname: student.fullname || "",
+      email: student.email || "",
+      password: "",
+      xp: student.xp || 0,
+      streak: student.streak || 0,
+      avatar: student.avatar || "",
+      avatarFile: null,
     });
+    setEditing(true);
+  };
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${student.username}_activity_logs.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const closeEdit = () => setEditing(false);
+
+  const saveEdit = async () => {
+    if (!form.fullname.trim()) return alert("Fullname required");
+    if (!form.email.trim()) return alert("Email required");
+
+    try {
+      setSaving(true);
+      let avatarPath = form.avatar;
+      if (form.avatarFile) {
+        const uploaded = await uploadAvatar(form.avatarFile, form.id);
+        if (uploaded) avatarPath = uploaded;
+      }
+
+      const r = await fetch(`${BASE}/students/${form.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullname: form.fullname,
+          email: form.email,
+          password: form.password || "",
+          avatar: avatarPath || null,
+          xp: Number(form.xp || 0),
+          streak: Number(form.streak || 0),
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.success) {
+        alert(data.message || "Failed to update");
+        return;
+      }
+
+      // refresh student detail view
+      const r2 = await fetch(`${BASE}/students/${form.id}`);
+      if (r2.ok) {
+        const dd = await r2.json();
+        setStudent(dd.student);
+      }
+
+      setEditing(false);
+    } catch (err) {
+      console.error("SAVE EDIT ERROR:", err);
+      alert("Server error while updating");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!window.confirm(`Delete ${student.fullname}? This cannot be undone.`)) return;
+    try {
+      const r = await fetch(`${BASE}/students/${student.id}`, { method: "DELETE" });
+      const data = await r.json();
+      if (!r.ok || !data.success) {
+        alert(data.message || "Failed to delete");
+        return;
+      }
+      // go back to list
+      navigate("/students");
+    } catch (err) {
+      console.error("DELETE ERROR:", err);
+      alert("Server error while deleting");
+    }
   };
 
   return (
-    <div className="admin-layout">
-      {/* SIDEBAR */}
+    <div className={`admin-layout ${sidebarCollapsed ? "sidebar-hidden" : ""}`}>
+      {sidebarCollapsed && (
+        <button className="sidebar-open-btn" onClick={() => setSidebarCollapsed(false)}>
+          <FaBars />
+        </button>
+      )}
+
+      {/* UNIFIED SIDEBAR */}
       <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={logo1} className="sidebar-logo" alt="logo" />
-          <span className="sidebar-title">EduVerso Admin</span>
+        <div className="sidebar-top">
+          <div className="sidebar-header">
+            <img src={logo1} className="sidebar-logo" alt="logo" />
+            <span className="sidebar-title">EduVerso Admin</span>
+          </div>
+
+          <button
+            className="sidebar-collapse-btn"
+            onClick={() => setSidebarCollapsed((p) => !p)}
+          >
+            <FaBars />
+          </button>
         </div>
 
         <ul className="sidebar-menu">
           <li onClick={() => navigate("/dashboard")}>
-            <span className="menu-icon"><LuLayoutDashboard /></span>
+            <LuLayoutDashboard className="menu-icon" />
             <span className="menu-text">Dashboard</span>
           </li>
-          <li onClick={() => navigate("/students")} className="active">
-            <span className="menu-icon"><LuUsers /></span>
+
+          <li className="active" onClick={() => navigate("/students")}>
+            <LuUsers className="menu-icon" />
             <span className="menu-text">Students</span>
           </li>
-          <li onClick={() => navigate("/modules")}>
-            <span className="menu-icon"><LuBookOpen /></span>
+
+          <li onClick={() => navigate("/admin-modules")}>
+            <LuBookOpen className="menu-icon" />
             <span className="menu-text">Modules</span>
           </li>
-          <li>
-            <span className="menu-icon"><LuBrain /></span>
-            <span className="menu-text">Quiz Arena</span>
+
+          <li onClick={() => navigate("/admin-games")}>
+            <LuGamepad className="stu-menu-icon" />
+            <span className="stu-menu-text">Game Arena</span>
           </li>
-          <li>
-            <span className="menu-icon"><LuMessageSquare /></span>
+
+          <li onClick={() => navigate("/admin-peerfeedback")}>
+            <LuMessageSquare className="menu-icon" />
             <span className="menu-text">Peer Feedback</span>
           </li>
-          <li>
-            <span className="menu-icon"><LuMegaphone /></span>
+
+          <li onClick={() => navigate("/admin-announcements")}>
+            <LuMegaphone className="menu-icon" />
             <span className="menu-text">Announcements</span>
           </li>
 
           <div className="spacer" />
 
-          <li>
-            <span className="menu-icon"><LuSettings /></span>
+          <li onClick={() => navigate("/admin-settings")}>
+            <LuSettings className="menu-icon" />
             <span className="menu-text">Settings</span>
           </li>
-          <li className="logout">
-            <span className="menu-icon"><LuLogOut /></span>
-            <span className="menu-text">Logout</span>
+
+          <li
+            className="logout"
+            onClick={() => {
+              localStorage.removeItem("admin_logged_in");
+              window.location.href = "/login";
+            }}
+          >
+            <LuLogOut className="menu-icon" /> Logout
           </li>
         </ul>
       </aside>
 
-      {/* MAIN */}
+      {/* MAIN CONTENT */}
       <main className="main-content">
-        {/* top controls */}
-        <div className="progress-top">
-          <div className="left-controls">
-            <button className="back-btn" onClick={() => navigate(-1)}>
-              ← Back
-            </button>
-          </div>
+        <div className="dashboard-main-box">
+          <div className="main-inner">
+            <div className="student-header-card">
+              <div className="header-left">
+                <img
+                  className="avatar-large"
+                  src={student.avatar ? `${BASE}/${student.avatar}` : noAvatar}
+                  alt="avatar"
+                />
+                <div className="meta">
+                  <h2 className="student-name">{student.fullname}</h2>
+                  <div className="student-sub">{student.email}</div>
 
-          <div className="right-controls">
-            <div className="last-login">Last login: {formatDate(student.lastLogin)}</div>
-            <button className="export-btn" onClick={exportLogs}>
-              📄 Export Logs
-            </button>
+                  <div className="student-basic-info">
+                    <p>ID: {student.id}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="header-right">
+                <div className="quick-stats">
+                  <div className="stat small">
+                    <div className="stat-label">XP</div>
+                    <div className="stat-value">{student.xp}</div>
+                  </div>
+
+                  <div className="stat small">
+                    <div className="stat-label">Level</div>
+                    <div className="stat-value">{level}</div>
+                  </div>
+
+                  <div className="stat small">
+                    <div className="stat-label">Streak</div>
+                    <div className="stat-value">🔥 {student.streak}</div>
+                  </div>
+                </div>
+
+                <div className="level-progress">
+                  <div className="progress-row">
+                    <span>Progress to next level</span>
+                    <span>{progressPercent}%</span>
+                  </div>
+
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                  <button
+                    className="btn ghost"
+                    onClick={() => navigate("/students")}
+                  >
+                    ← Back
+                  </button>
+
+                  <button className="btn" onClick={openEdit}>
+                    <FaEdit /> &nbsp;Edit
+                  </button>
+
+                  <button className="btn danger" onClick={confirmDelete}>
+                    <FaTrash /> &nbsp;Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="wide-card" style={{ marginTop: 20 }}>
+              <h3>📘 Activity Logs</h3>
+              <p className="muted">
+                Logs not available yet. You can add activity tracking later.
+              </p>
+            </div>
           </div>
         </div>
+      </main>
 
-        {/* student header card */}
-        <section className="student-header-card">
-          <div className="header-left">
-            <img
-              className="avatar-large"
-              src={student.avatar || previewSnapshot}
-              alt={`${student.username} avatar`}
-            />
-            <div className="meta">
-              <h2 className="student-name">{student.username}</h2>
-              <div className="student-sub">Grade {student.grade ?? "—"} · ID {student.id ?? "—"}</div>
-            </div>
-          </div>
+      {/* ---------- EDIT MODAL ---------- */}
+      {editing && (
+        <div className="ann-modal-backdrop" onClick={closeEdit}>
+          <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Edit Student</h2>
 
-          <div className="header-right">
-            <div className="quick-stats">
-              <div className="stat small">
-                <div className="stat-label">XP</div>
-                <div className="stat-value">{student.xp}</div>
-                <div className="stat-sub">Today +{xpToday}</div>
-              </div>
-
-              <div className="stat small">
-                <div className="stat-label">Level</div>
-                <div className="stat-value">Lv {student.level}</div>
-                <div className="stat-sub">Next in {xpToNext} XP</div>
-              </div>
-
-              <div className="stat small">
-                <div className="stat-label">Streak</div>
-                <div className="stat-value">🔥 {student.streak ?? 0}</div>
-                <div className="stat-sub">This week {xpWeek} XP</div>
-              </div>
+            <div className="field">
+              <label>Fullname</label>
+              <input value={form.fullname} onChange={(e) => setForm({ ...form, fullname: e.target.value })} />
             </div>
 
-            <div className="level-progress">
-              <div className="progress-row">
-                <div className="progress-label">Progress to next level</div>
-                <div className="progress-meta">{levelProgressPercent}%</div>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${levelProgressPercent}%` }} />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* dashboard metrics */}
-        <section className="dashboard-block">
-          <div className="cards-row">
-            <div className="metric-card">
-              <div className="metric-title">Completion</div>
-              <div className="metric-big">{completion}%</div>
-              <div className="metric-sub">Module completion rate</div>
+            <div className="field">
+              <label>Email</label>
+              <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
 
-            <div className="metric-card">
-              <div className="metric-title">Time Spent (week)</div>
-              <div className="metric-big">{timeThisWeek} min</div>
-              <div className="metric-sub">Sessions: {Math.max(1, Math.round(timeThisWeek / 30))}</div>
+            <div className="field">
+              <label>Password (leave blank to keep current)</label>
+              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
             </div>
 
-            <div className="metric-card">
-              <div className="metric-title">Last Module</div>
-              <div className="metric-big">{student.lastModule ?? "—"}</div>
-              <div className="metric-sub">Last opened {formatDate(student.lastModuleDate)}</div>
+            <div className="field">
+              <label>XP</label>
+              <input type="number" value={form.xp} onChange={(e) => setForm({ ...form, xp: Number(e.target.value) })} />
             </div>
 
-            <div className="metric-card">
-              <div className="metric-title">Achievements</div>
-              <div className="achievement-list">
-                {(student.achievements && student.achievements.length) ? (
-                  student.achievements.slice(0, 3).map((a, i) => <span key={i} className="achievement">{a}</span>)
-                ) : (
-                  <span className="achievement muted">No badges yet</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="cards-row lower">
-            <div className="wide-card">
-              <div className="wide-title">Recent mini-tests</div>
-              <div className="mini-tests">
-                {(student.tests && student.tests.length) ? (
-                  student.tests.slice(0, 4).map((t, i) => (
-                    <div className="mini-test" key={i}>
-                      <div>
-                        <div className="mt-name">{t.name}</div>
-                        <div className="mt-date">{formatDate(t.date)}</div>
-                      </div>
-                      <div className="mt-score">{t.score}%</div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="muted">No tests yet</div>
-                )}
-              </div>
+            <div className="field">
+              <label>Streak</label>
+              <input type="number" value={form.streak} onChange={(e) => setForm({ ...form, streak: Number(e.target.value) })} />
             </div>
 
-            <div className="wide-card">
-              <div className="wide-title">Activity snapshot</div>
-              <div className="snapshot">
-                <img src={previewSnapshot} alt="snapshot" className="snapshot-img" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* info + logs */}
-        <section className="info-and-logs">
-          <div className="info-panel">
-            <h3>Student Information</h3>
-            <div className="info-box">
-              <p><strong>XP:</strong> {student.xp}</p>
-              <p><strong>Streak:</strong> {student.streak ?? 0}</p>
-              <p><strong>Level:</strong> {student.level}</p>
-              <p className="muted">Student ID: {student.id ?? "—"}</p>
-            </div>
-          </div>
-
-          <div className="logs-panel">
-            <h3>Real-Time Activity Logs</h3>
-            <div className="logs-list">
-              {logs.length === 0 ? (
-                <p className="no-logs">No activity yet.</p>
-              ) : (
-                logs.map((log, i) => (
-                  <div key={i} className="log-item">
-                    <div className="log-time">{formatDate(log.timestamp)}</div>
-                    <div className="log-desc">
-                      {log.type === "login" && <>🟢 <strong>Login</strong></>}
-                      {log.type === "logout" && <>🔴 <strong>Logout</strong> — Duration: {log.duration} min</>}
-                      {log.type === "micro_lesson" && <>⚡ <strong>Micro Lesson {log.lessonId}</strong> — Score {log.score}, XP {log.xpEarned}</>}
-                      {log.type === "module_start" && <>📘 <strong>Started module {log.moduleId}</strong></>}
-                      {log.type === "module_progress" && <>📄 <strong>Module progress</strong> — {log.percent}%</>}
-                      {log.type === "module_end" && <>✅ <strong>Module finished</strong> — Duration {log.duration} min</>}
-                    </div>
-                  </div>
-                ))
+            <div className="field">
+              <label>Avatar (optional)</label>
+              <input type="file" accept="image/*" onChange={(e) => setForm((f) => ({ ...f, avatarFile: e.target.files && e.target.files[0] }))} />
+              {form.avatar && !form.avatarFile && (
+                <div style={{ marginTop: 8 }}>
+                  <img src={`${BASE}/${form.avatar}`} alt="avatar" style={{ width: 80, height: 80, borderRadius: 8 }} />
+                </div>
               )}
             </div>
+
+            <div className="ann-modal-actions">
+              <button className="btn" onClick={closeEdit}>Cancel</button>
+              <button className="btn add" onClick={saveEdit} disabled={saving}>{saving ? "Saving..." : "Save"}</button>
+            </div>
           </div>
-        </section>
-      </main>
+        </div>
+      )}
     </div>
   );
 }

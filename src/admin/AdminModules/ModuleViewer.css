@@ -1,0 +1,34 @@
+.viewer-container {
+  padding: 20px;
+  color: white;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background: #6c63ff;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.viewer-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.pdf-box {
+  background: rgba(255,255,255,0.08);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.pdf-iframe {
+  width: 100%;
+  height: 720px;
+  border: none;
+  border-radius: 12px;
+  background: #000;
+}

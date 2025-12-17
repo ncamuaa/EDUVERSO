@@ -12,8 +12,10 @@ import AdminModules from "./admin/AdminModules/AdminModules";
 import AdminPeerFeedback from "./admin/AdminPeerFeedback/AdminPeerFeedback";
 import AdminAnnouncements from "./admin/AdminAnnouncements/AdminAnnouncements";
 import AdminSettings from "./admin/AdminSettings/AdminSettings";
+import ModuleViewer from "./admin/AdminModules/ModuleViewer";
 
-
+import AdminGame from "./admin/AdminGame/AdminGame";
+import GameRecords from "./admin/AdminGame/GameRecords"; // ✅ FIXED PATH
 
 // -------- PROTECTED ROUTE --------
 function ProtectedRoute({ children }) {
@@ -31,8 +33,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        
-        {/* -------- LOGIN PAGE -------- */}
+
+        {/* -------- LOGIN -------- */}
         <Route
           path="/login"
           element={
@@ -108,6 +110,31 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/admin-modules/:id"
+          element={
+            <ProtectedRoute>
+              <ModuleViewer />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= ADMIN GAMES (FIXED) ================= */}
+        <Route
+          path="/admin-games"
+          element={
+            <ProtectedRoute>
+              <AdminGame />
+            </ProtectedRoute>
+          }
+        >
+          {/* 🔽 NESTED ROUTE (THIS FIXES EMPTY PAGE) */}
+          <Route
+            path="records/:gameType"
+            element={<GameRecords />}
+          />
+        </Route>
+
         {/* -------- ADMIN PEER FEEDBACK -------- */}
         <Route
           path="/admin-peerfeedback"
@@ -128,15 +155,15 @@ export default function App() {
           }
         />
 
-       <Route
-  path="/admin-settings"
-  element={
-    <ProtectedRoute>
-      <AdminSettings />
-    </ProtectedRoute>
-  }
-/>
-
+        {/* -------- ADMIN SETTINGS -------- */}
+        <Route
+          path="/admin-settings"
+          element={
+            <ProtectedRoute>
+              <AdminSettings />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

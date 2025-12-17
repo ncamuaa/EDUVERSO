@@ -1,34 +1,235 @@
-/* ---------------- MAIN LAYOUT ---------------- */
-.pf-main {
-  padding: 40px;
-  color: white;
-  overflow-y: auto;
-  height: 100vh;
+/* COLORS */
+:root {
+  --bg-a: #0d0b52;
+  --bg-b: #5a2dfd;
+  --card: rgba(16, 23, 68, 0.78);
+  --text: #e3e7ff;
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #8f63ff;
+  --glass: rgba(255,255,255,0.06);
 }
 
-/* ---------------- TOPBAR ---------------- */
-.pf-topbar {
+/* LAYOUT */
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* When hidden: sidebar 0px */
+.admin-layout.sidebar-hidden {
+  grid-template-columns: 0 1fr !important;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  padding: 18px;
+  background: rgba(10, 15, 50, 0.55);
+  backdrop-filter: blur(14px);
+  border-right: 1px solid var(--border);
+  transition: 0.28s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-layout.sidebar-hidden .sidebar {
+  transform: translateX(-280px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* TOP PART */
+.sidebar-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
 }
 
-.pf-controls {
+.sidebar-logo {
+  width: 46px;
+}
+
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sidebar-collapse-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  padding: 8px;
+  border-radius: 10px;
+  color: var(--text);
+}
+
+/* MENU */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 22px;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-/* SEARCH BOX */
-.pf-search {
-  background: rgba(255,255,255,0.10);
-  padding: 10px 16px;
+.sidebar-menu li {
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.18s;
+}
+
+.sidebar-menu li:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.sidebar-menu li.active {
+  background: rgba(143,99,255,0.15);
+  border: 1px solid rgba(143,99,255,0.25);
+}
+
+.menu-icon {
+  font-size: 1.4rem;
+  color: var(--text);
+}
+
+.logout {
+  color: #ff8b8b;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* FLOATING SIDEBAR OPEN BUTTON */
+.sidebar-open-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 46px;
+  height: 46px;
   border-radius: 12px;
+  background: rgba(15,18,40,0.9);
+  border: 1px solid rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+  transition: 0.2s;
+}
+.sidebar-open-btn:hover {
+  transform: scale(1.08);
+  background: rgba(18,20,46,0.95);
+}
+
+/* MAIN CONTENT */
+.pf-main {
+  padding: 40px;
+  overflow-y: auto;
+  height: 100vh;
+  color: white;
+}
+
+.pf-main-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 0 45px rgba(0,0,0,0.22);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* TOPBAR */
+.pf-topbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.content-inner {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right-controls {
+  display: flex;
+  gap: 10px;
+}
+
+/* BUTTONS */
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,0.22);
+  transform: scale(1.05);
+}
+
+.rect-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+}
+
+.add-btn {
+  background: linear-gradient(90deg,#6c63ff,#726bff);
+  border: none;
+}
+
+/* CONTROLS ROW */
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.left-controls {
+  display: flex;
   gap: 12px;
-  min-width: 280px;
+}
+
+.pf-sort {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: white;
+}
+
+/* SEARCH */
+.pf-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.10);
+  padding: 10px 14px;
+  border-radius: 12px;
 }
 
 .pf-search input {
@@ -39,105 +240,58 @@
   width: 100%;
 }
 
-/* SORT DROPDOWN */
-.pf-sort {
-  background: rgba(255,255,255,0.12);
-  border: none;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-}
-
-/* TOPBAR ICON BUTTONS — FIXED BIGGER */
-.icon-btn {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255,255,255,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.08);
-}
-
-.icon-btn svg {
-  width: 22px !important;
-  height: 22px !important;
-  color: white;
-}
-
-/* ---------------- FEEDBACK LIST ---------------- */
+/* LIST */
 .feedback-list {
-  width: 100%;
-  max-width: 1100px;
-  margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 28px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* FEEDBACK CARD */
 .feedback-card {
-  background: rgba(12, 12, 32, 0.75);
-  padding: 26px;
+  background: rgba(12,12,32,0.75);
   border-radius: 20px;
+  padding: 26px;
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
-/* HEADER */
+/* CARD HEADER */
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
 }
 
-.card-header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pf-student {
-  opacity: 0.85;
-  font-size: 15px;
-}
-
-/* ACTION BUTTONS */
 .card-actions {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .act {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+}
+
+/* Make sure SVG icons are block-level and exactly centered */
+.act {
+  line-height: 0; /* prevent baseline offset */
 }
 
 .act svg {
-  width: 22px;
-  height: 22px;
-  color: white;
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
-.act-view { background: #726bff; }
-.act-approve { background: #22b86c; }
-.act-delete { background: #ff6b6b; }
+.act-delete svg { color: #ff6b6b; }
+.act-edit svg { color: #f59e0b; }
+.act-view svg { color: #726bff; }
 
 /* FOOTER */
 .card-footer {
@@ -146,65 +300,52 @@
   margin-top: 18px;
 }
 
-.stars {
+.stars svg {
   color: gold;
-  font-size: 18px;
 }
 
-.date {
-  opacity: 0.85;
-}
-
-/* ---------------- MODALS ---------------- */
+/* MODALS */
 .pf-modal-bg {
   position: fixed;
   inset: 0;
+  backdrop-filter: blur(4px);
   background: rgba(0,0,0,0.60);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.pf-modal {
+.pf-modal,
+.pf-delete-modal {
   background: #111;
   padding: 32px;
   border-radius: 20px;
-  width: 500px;
-  color: white;
-}
-
-.pf-close {
-  margin-top: 20px;
-  width: 100%;
-  padding: 12px;
-  background: #6c63ff;
-  border: none;
-  border-radius: 10px;
-  color: white;
-}
-
-/* DELETE MODAL */
-.pf-delete-modal {
-  background: #1a0b0b;
-  padding: 30px;
-  border-radius: 18px;
-  width: 420px;
+  width: 460px;
   color: white;
 }
 
 .delete-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: space-between;
+  margin-top: 24px;
 }
 
-.cancel,
 .confirm {
-  padding: 10px 16px;
+  background: #ff6b6b;
+  padding: 9px 20px;
   border-radius: 10px;
-  border: none;
-  cursor: pointer;
 }
 
-.cancel { background: gray; }
-.confirm { background: #ff4c4c; color: white; }
+.cancel {
+  padding: 9px 20px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.pf-close {
+  margin-top: 20px;
+  width: 100%;
+  background: #6c63ff;
+  padding: 12px;
+  border-radius: 10px;
+}

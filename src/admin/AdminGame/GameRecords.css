@@ -1,0 +1,51 @@
+
+
+/* ======================================================
+   BACK BUTTON
+====================================================== */
+.back-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+/* ======================================================
+   TITLE
+====================================================== */
+.records-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 22px;
+}
+
+/* ======================================================
+   RECORDS TABLE
+====================================================== */
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(20, 18, 60, 0.7);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.records-table th,
+.records-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.records-table th {
+  background: rgba(255,255,255,0.08);
+  font-weight: 700;
+}
+
+.records-table tr:hover {
+  background: rgba(255,255,255,0.06);
+}

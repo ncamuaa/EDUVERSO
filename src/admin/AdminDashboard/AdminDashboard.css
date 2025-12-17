@@ -1,119 +1,97 @@
-/* =======================================================
-   ROOT COLORS
-======================================================= */
+/* ========= ROOT COLORS ========= */
 :root {
-  --bg-a: #0d0b52;
-  --bg-b: #5a2dfd;
-  --card: rgba(16, 23, 68, 0.78);
-  --card-dark: rgba(0, 0, 0, 0.35);
-  --text: #e3e7ff;
-  --border: rgba(255, 255, 255, 0.12);
-  --accent: #8f63ff;
-  --glass: rgba(255,255,255,0.06);
+  --adm-bg-a: #0d0b52;
+  --adm-bg-b: #5a2dfd;
+  --adm-card: rgba(16, 23, 68, 0.78);
+  --adm-border: rgba(255, 255, 255, 0.12);
+  --adm-text: #e3e7ff;
+  --adm-accent: #8f63ff;
 }
 
-/* Background */
+/* enable gradient when .admin-dark is on <html> */
 html.admin-dark,
 body.admin-dark {
   height: 100%;
-  background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
-  color: var(--text);
-  font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, var(--adm-bg-a), var(--adm-bg-b));
+  color: var(--adm-text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 }
 
-/* =======================================================
-   MAIN GRID LAYOUT
-   (When sidebar is hidden, grid uses 0 for first column)
-======================================================= */
-
-.admin-layout {
+/* ========= LAYOUT ========= */
+.adm-layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  position: relative;
 }
 
-/* hide variant: first column becomes 0 and main expands */
-.admin-layout.sidebar-hidden {
+/* when hidden -> first column collapses */
+.adm-layout.adm-sidebar-hidden {
   grid-template-columns: 0 1fr !important;
 }
 
-/* =======================================================
-   SIDEBAR
-   - when hidden we position it fixed and translateX off-screen
-======================================================= */
-
-.sidebar {
-  width: 260px; /* natural width when visible */
+/* ========= SIDEBAR ========= */
+.adm-sidebar {
   padding: 18px;
   background: rgba(10, 15, 50, 0.55);
   backdrop-filter: blur(14px);
-  border-right: 1px solid var(--border);
-  overflow: hidden;
+  border-right: 1px solid var(--adm-border);
   display: flex;
   flex-direction: column;
   transition: transform 0.28s ease, opacity 0.18s ease;
-  will-change: transform;
   z-index: 60;
 }
 
-/* when hidden we move the aside off-screen and ensure it doesn't block layout */
-.admin-layout.sidebar-hidden .sidebar {
+.adm-layout.adm-sidebar-hidden .adm-sidebar {
   transform: translateX(-280px);
-  pointer-events: none; /* avoid accidental clicks while hidden */
+  pointer-events: none;
   opacity: 0.98;
 }
 
-/* keep width intact but the grid column is 0 so main expands */
-.sidebar-top {
+.adm-sidebar-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.sidebar-header {
+.adm-sidebar-header {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.sidebar-logo {
+.adm-sidebar-logo {
   width: 45px;
   height: 45px;
 }
 
-.sidebar-title {
-  font-size: 1.2rem;
+.adm-sidebar-title {
   font-weight: 700;
-  color: var(--text);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  font-size: 1.15rem;
 }
 
-/* Collapse (hide) button sits inside sidebar when visible */
-.sidebar-collapse-btn {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  color: var(--text);
+.adm-sidebar-collapse-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--adm-border);
+  color: var(--adm-text);
   padding: 8px;
   border-radius: 10px;
   cursor: pointer;
 }
 
-/* Sidebar menu */
-.sidebar-menu {
+/* menu */
+.adm-sidebar-menu {
   list-style: none;
-  margin-top: 22px;
+  margin: 22px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.sidebar-menu li {
+.adm-sidebar-menu li {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -123,102 +101,84 @@ body.admin-dark {
   transition: background 0.18s ease;
 }
 
-.sidebar-menu li:hover {
-  background: rgba(255,255,255,0.06);
+.adm-sidebar-menu li:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
-/* menu icons (lucide) */
-.menu-icon {
+.adm-sidebar-menu li.active {
+  background: rgba(143, 99, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(143, 99, 255, 0.4);
+}
+
+.adm-menu-icon {
   font-size: 1.45rem;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
+  color: var(--adm-text);
 }
 
-/* hide text visually while keeping accessible (screen readers) when we need tiny collapsed mode */
-.admin-layout.sidebar-hidden .menu-text {
-  opacity: 0;
-  transform: translateX(-6px);
-  pointer-events: none;
-  height: 0;
-  margin: 0;
+.adm-menu-text {
+  color: var(--adm-text);
+  font-weight: 600;
 }
 
-/* logout */
-.logout { color: #ff8b8b; }
+.logout {
+  color: #ff8b8b;
+}
 
-/* push items to bottom */
-.spacer { flex: 1; }
+.adm-spacer {
+  flex: 1;
+}
 
-/* =======================================================
-   FLOATING OPEN BUTTON (fixed, visible when sidebar hidden)
-======================================================= */
-
-.sidebar-open-btn {
+/* floating open button */
+.adm-sidebar-open-btn {
   position: fixed;
   top: 20px;
   left: 18px;
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: rgba(15,18,40,0.9);
-  border: 1px solid var(--border);
+  background: rgba(15, 18, 40, 0.9);
+  border: 1px solid var(--adm-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text);
+  color: var(--adm-text);
   cursor: pointer;
   z-index: 9999;
-  backdrop-filter: blur(8px);
-  transition: transform .18s ease, background .18s ease;
+  backdrop-filter: blur(10px);
+  transition: transform 0.18s ease, background 0.18s ease;
 }
-.sidebar-open-btn:hover { transform: scale(1.06); background: rgba(18,20,46,0.95); }
-
-/* =======================================================
-   MOBILE OVERLAY
-======================================================= */
-
-.sidebar-overlay { display: none; }
-@media (max-width: 900px) {
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 50;
-  }
-  /* mobile: hide sidebar by default just translate it off-screen when hidden */
-  .admin-layout { grid-template-columns: 80px 1fr; }
-  .admin-layout.sidebar-hidden { grid-template-columns: 0 1fr !important; }
+.adm-sidebar-open-btn:hover {
+  transform: scale(1.06);
+  background: rgba(18, 20, 46, 0.95);
 }
 
-/* =======================================================
-   MAIN CONTENT
-======================================================= */
-
-.main-content {
+/* ========= MAIN ========= */
+.adm-main {
   width: 100%;
   height: 100%;
   padding: 28px 32px;
+  box-sizing: border-box;
   overflow-y: auto;
-  overflow-x: hidden;
-  background: transparent;
-  transition: padding-left 0.22s ease;
 }
 
-.main-inner {
+.adm-main-glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(14px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.adm-main-inner {
   max-width: 1300px;
   margin: 0 auto;
 }
 
-/* =======================================================
-   TOP BAR
-======================================================= */
-
-.topbar {
+/* ========= TOPBAR ========= */
+.adm-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -226,60 +186,169 @@ body.admin-dark {
   margin-bottom: 26px;
 }
 
-/* search */
-.search-bar {
-  background: rgba(255,255,255,0.06);
+.adm-search {
+  background: rgba(255, 255, 255, 0.06);
   padding: 12px 16px;
   border-radius: 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--adm-border);
   display: flex;
   align-items: center;
-  width: clamp(180px, 40%, 420px);
-}
-.search-bar input { background:none; border:none; color:var(--text); margin-left:12px; width:100%; outline:none; }
-
-/* floating actions */
-.floating-actions { display:flex; gap:14px; align-items:center; }
-.icon-btn {
-  width:44px; height:44px; border-radius:12px;
-  background: rgba(255,255,255,0.07); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center; color:var(--text); cursor:pointer;
-}
-.icon-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.12); }
-.notif-dot { width:8px; height:8px; background:#ff4d4d; border-radius:50%; position:absolute; margin-left:16px; margin-top:-20px; }
-.notif-panel { position:absolute; right:30px; top:70px; background:var(--card); border:1px solid var(--border); padding:16px; border-radius:12px; z-index:60; }
-
-/* =======================================================
-   DASHBOARD GRID & CARDS
-======================================================= */
-
-.dashboard-grid { display:grid; grid-template-columns: 1.4fr 1fr; gap:26px; }
-.left-grid, .right-grid { display:flex; flex-direction:column; gap:24px; }
-.stats-row { display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; }
-
-.stat-card, .info-card, .chart-card, .wide-card, .quick-actions {
-  background: var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; color:var(--text);
+  width: clamp(220px, 40%, 420px);
 }
 
-/* stat internals */
-.stat-icon { font-size:1.8rem; }
-.stat-title { font-size:1.1rem; font-weight:600; }
-.stat-value { font-size:1.4rem; font-weight:700; }
-.stat-delta.pos { color:#7fff8a; }
-.stat-delta.neg { color:#ff7f7f; }
+.adm-search input {
+  background: none;
+  border: none;
+  outline: none;
+  margin-left: 10px;
+  color: var(--adm-text);
+  width: 100%;
+}
 
-.two-cards { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
-.actions-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:16px; }
-.action { padding:14px; background: rgba(255,255,255,0.07); border-radius:12px; border:1px solid var(--border); cursor:pointer; text-align:center; }
-.action.big { background: linear-gradient(90deg,#6b4cff,#8f63ff); color:white; box-shadow: 0 8px 24px rgba(143,99,255,0.3); }
+.adm-search-icon {
+  color: var(--adm-text);
+}
+
+.adm-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.adm-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--adm-border);
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--adm-text);
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.adm-icon-btn:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.adm-notif-panel {
+  position: absolute;
+  right: 40px;
+  top: 80px;
+  background: var(--adm-card);
+  border: 1px solid var(--adm-border);
+  padding: 16px;
+  border-radius: 12px;
+  z-index: 70;
+}
+
+/* ========= GRID & CARDS ========= */
+.adm-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 26px;
+}
+
+.adm-left,
+.adm-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.adm-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.adm-stat-card,
+.adm-info-card,
+.adm-wide-card,
+.adm-chart-card {
+  background: var(--adm-card);
+  border: 1px solid var(--adm-border);
+  border-radius: 14px;
+  padding: 20px;
+  color: var(--adm-text);
+}
+
+/* stat details */
+.adm-stat-icon {
+  font-size: 1.7rem;
+  margin-bottom: 4px;
+}
+.adm-stat-title {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+.adm-stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* info cards */
+.adm-two-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.adm-info-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+.adm-info-actions button {
+  padding: 10px 14px;
+  border-radius: 11px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+.adm-info-actions button:first-child {
+  background: #22c55e;
+  color: white;
+}
+.adm-info-actions button:last-child {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--adm-text);
+}
+
+.adm-wide-card p {
+  margin-top: 6px;
+  opacity: 0.9;
+}
 
 /* charts */
-.chart-card h4 { margin-bottom:10px; }
+.adm-chart-card h4 {
+  margin-bottom: 10px;
+}
 
 /* responsive */
-@media (max-width: 1200px) { .dashboard-grid { grid-template-columns: 1fr; } }
-@media (max-width: 900px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .two-cards { grid-template-columns: 1fr; }
+@media (max-width: 1200px) {
+  .adm-grid {
+    grid-template-columns: 1fr;
+  }
 }
-@media (max-width: 600px) { .stats-row { grid-template-columns: 1fr; } }
+
+@media (max-width: 900px) {
+  .adm-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .adm-two-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .adm-stats-row {
+    grid-template-columns: 1fr;
+  }
+  .adm-main {
+    padding: 20px;
+  }
+}

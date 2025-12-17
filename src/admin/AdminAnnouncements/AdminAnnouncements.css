@@ -15,224 +15,198 @@
 }
 
 /* =========================================
-   BASE LAYOUT
+   PAGE BACKGROUND
 ========================================= */
-html.admin-dark, .admin-layout {
+html.admin-dark,
+body.admin-dark {
   background: linear-gradient(180deg, #472ea8 0%, #30146a 100%);
-  min-height: 100vh;
   font-family: "Inter", sans-serif;
   color: white;
 }
 
+/* =========================================
+   ADMIN LAYOUT
+========================================= */
 .admin-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
   height: 100vh;
   overflow: hidden;
+  position: relative;
+}
+
+.admin-layout.sidebar-collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+/* FLOATING "OPEN SIDEBAR" BUTTON */
+.sidebar-open-btn {
+  position: fixed;
+  top: 20px;
+  left: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(15,18,40,0.9);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  transition: .2s ease;
+}
+
+.sidebar-open-btn:hover {
+  transform: scale(1.05);
 }
 
 /* =========================================
-   SIDEBAR FIXED & CLEAN
+   SIDEBAR (Dashboard Style)
 ========================================= */
 .sidebar {
   width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
-  background: var(--sidebar-bg);
-  padding: 28px 18px;
+  padding: 18px;
+  background: rgba(10, 15, 50, 0.55);
+  backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(255,255,255,0.1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 8px 0 30px rgba(0,0,0,0.55);
-  border-right: 1px solid rgba(255,255,255,0.05);
+  transition: transform .25s ease;
+  z-index: 90;
 }
 
-.sidebar-collapsed .sidebar {
-  width: 72px;
-  min-width: 72px;
-  padding: 20px 10px;
+.admin-layout.sidebar-collapsed .sidebar {
+  transform: translateX(-280px);
+  pointer-events: none;
 }
 
-/* --- Sidebar Header --- */
+/* Sidebar header */
+.sidebar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .sidebar-logo {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-}
-.sidebar-title {
-  font-size: 16px;
-  font-weight: 700;
-}
-.sidebar-collapse-btn {
-  margin-left: auto;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  border: none;
-  color: white;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
+  width: 45px;
+  height: 45px;
 }
 
-/* --- MENU --- */
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Collapse button */
+.sidebar-collapse-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Sidebar menu */
 .sidebar-menu {
   list-style: none;
-  padding: 12px 0 0 0;
-  margin: 0;
-  flex: 1;
+  padding: 0;
+  margin-top: 22px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sidebar-menu li {
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  color: rgba(255,255,255,0.9);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+  color: rgba(255,255,255,0.92);
   font-weight: 600;
-  transition: 0.15s;
 }
 
 .sidebar-menu li:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
 }
 
 .sidebar-menu li.active {
-  background: rgba(108,99,255,0.15);
-  box-shadow: inset 0 0 0 1px rgba(108,99,255,0.25);
+  background: rgba(108,99,255,0.18);
+  border-left: 3px solid var(--accent);
 }
 
-/* Keep Logout at bottom */
-.sidebar-menu .spacer {
+.menu-icon {
+  font-size: 1.45rem;
+  color: white;
+}
+
+.menu-text {
+  color: white;
+}
+
+.spacer {
   flex: 1;
 }
 
-/* When collapsed */
-.sidebar-collapsed .sidebar-title {
-  display: none;
-}
-.sidebar-collapsed .sidebar-menu li {
-  justify-content: center;
-}
-.sidebar-collapsed .sidebar-menu li span {
-  display: none;
+.logout {
+  color: #ff8b8b !important;
 }
 
 /* =========================================
    MAIN CONTENT WRAPPER
 ========================================= */
 .admin-ann-container {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
   padding: 36px 48px;
   box-sizing: border-box;
 }
 
+/* GLASS BOX */
+.ann-main-box-dashboard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 22px;
+  padding: 38px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 55px rgba(0,0,0,0.32);
+  max-width: 1350px;
+  margin: 0 auto;
+}
+
 /* =========================================
-   HEADER
+   HEADER — Title + Icons
 ========================================= */
-.ann-header {
+.ann-top-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 22px;
-}
-
-.ann-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
 .ann-main-title {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 800;
   margin: 0;
 }
 
-.ann-sub {
-  color: var(--muted);
-  font-size: 14px;
-  margin-top: -4px;
-}
-
-/* =========================================
-   HEADER CONTROLS (SEARCH / SORT / BUTTONS)
-========================================= */
-.ann-controls {
+.ann-icons-right {
   display: flex;
-  align-items: center;
   gap: 12px;
 }
 
-/* Search bar */
-.ann-search {
-  background: rgba(255,255,255,0.06);
-  padding: 10px 14px;
-  min-width: 360px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-}
-.ann-search input {
-  background: none;
-  border: none;
-  outline: none;
-  color: white;
-  width: 100%;
-  font-size: 15px;
-}
-
-/* Sort dropdown */
-.ann-sort {
-  background: rgba(255,255,255,0.06);
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: none;
-  color: white;
-  font-size: 14px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
-
-/* Buttons */
-.btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  background: rgba(255,255,255,0.04);
-  color: white;
-  font-weight: 600;
-  transition: 0.15s;
-}
-.btn:hover {
-  transform: translateY(-2px);
-  opacity: 0.95;
-}
-.btn.add {
-  background: var(--accent);
-  box-shadow: 0 8px 24px rgba(108,99,255,0.2);
-}
-.btn.danger {
-  background: var(--danger);
-}
-
-/* Icon buttons (Notification, Dark mode) */
 .icon-btn {
   width: 46px;
   height: 46px;
@@ -246,80 +220,151 @@ html.admin-dark, .admin-layout {
   box-shadow: 0 8px 22px rgba(0,0,0,0.25);
 }
 
+/* Subtitle */
+.ann-sub {
+  margin-top: 6px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* =========================================
+   CONTROLS ROW (Search, Sort, Add)
+========================================= */
+.ann-controls.under-title {
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Search */
+.ann-search {
+  background: rgba(255,255,255,0.06);
+  padding: 10px 14px;
+  min-width: 320px;
+  border-radius: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.ann-search input {
+  background: none;
+  border: none;
+  outline: none;
+  color: white;
+  width: 100%;
+}
+
+/* Sort */
+.ann-sort {
+  background: rgba(255,255,255,0.06);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: white;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn.add {
+  background: var(--accent);
+  box-shadow: 0 8px 24px rgba(108,99,255,0.2);
+}
+
+.btn.danger {
+  background: var(--danger);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
 /* =========================================
    ANNOUNCEMENT CARDS
 ========================================= */
 .ann-list {
-  margin-top: 22px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 24px;
 }
 
 .ann-card {
   background: var(--panel);
   padding: 28px;
-  border-radius: var(--radius);
+  border-radius: 18px;
   border: 1px solid var(--card-border);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.28);
 }
 
 .ann-card-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 14px;
 }
 
 .ann-title {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
-  margin: 0;
 }
 
 .ann-meta {
   font-size: 14px;
-  color: var(--muted);
+  opacity: 0.75;
 }
 
 .ann-message {
-  margin-top: 4px;
+  margin-top: 8px;
   line-height: 1.6;
-  color: rgba(255,255,255,0.92);
 }
 
 /* =========================================
-   ACTION ICON BUTTONS (view/edit/delete)
+   CARD ACTION ICONS
 ========================================= */
 .ann-actions {
   display: flex;
-  gap: 12px;
+  gap: 14px;
+  align-items: center;
 }
 
 .ann-actions .icon {
-  width: 50px;
-  height: 50px;
+  width: 56px; /* larger clickable area */
+  height: 56px;
   border-radius: 12px;
   background: rgba(255,255,255,0.06);
-  border: none;
-
-  /* FIX: center icons */
   display: flex;
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
-  font-size: 20px;
-  color: white;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-  transition: 0.15s ease;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  font-size: 1.05rem; /* increase icon size */
 }
 
 .ann-actions .icon:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.28);
 }
 
-.ann-actions .icon.danger {
+.ann-actions .danger {
   background: var(--danger);
 }
 
@@ -333,37 +378,36 @@ html.admin-dark, .admin-layout {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1500;
+  z-index: 2000;
 }
 
 .ann-modal,
 .ann-delete-modal {
-  background: #0b0b12;
-  padding: 24px;
-  border-radius: 14px;
-  width: 680px;
+  background: rgba(12,12,22,0.95);
+  padding: 26px;
+  border-radius: 16px;
+  width: 650px;
   max-width: calc(100% - 40px);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.65);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn .2s ease;
 }
 
 .ann-delete-modal {
-  width: 460px;
+  width: 400px;
 }
 
-.ann-modal .field {
-  margin-top: 12px;
+.field {
+  margin-top: 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.ann-modal input,
-.ann-modal textarea {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 10px;
+.field input,
+.field textarea {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px;
+  padding: 10px;
   color: white;
   outline: none;
 }
@@ -372,28 +416,54 @@ html.admin-dark, .admin-layout {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* Fade animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* =========================================
    RESPONSIVE
 ========================================= */
 @media (max-width: 900px) {
-  .ann-header {
+  .ann-top-row {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 14px;
   }
 
   .ann-controls {
-    flex-wrap: wrap;
+    flex-direction: column;
+    width: 100%;
   }
 
   .ann-search {
     min-width: 100%;
   }
+}
+.ann-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  z-index: 999;
+}
+
+.ann-modal,
+.ann-delete-modal {
+  position: relative;
+  background: #111827;
+  padding: 24px;
+  border-radius: 14px;
+  width: 500px;
+  max-width: 90%;
+  margin: auto;
+  z-index: 1000;
+}
+
+.ann-modal-actions button {
+  pointer-events: auto;
 }

@@ -1,3 +1,4 @@
+// src/pages/Admin/AdminAnnouncements.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FaPlus,
@@ -8,113 +9,281 @@ import {
   FaBell,
   FaMoon,
   FaSun,
-  FaBars
+  FaBars,
 } from "react-icons/fa";
 
 import {
   LuLayoutDashboard,
   LuUsers,
   LuBookOpen,
-  LuBrain,
+  LuGamepad2,   // ✅ standardized icon
   LuMessageSquare,
   LuMegaphone,
   LuSettings,
-  LuLogOut
+  LuLogOut,
 } from "react-icons/lu";
 
 import logo from "../../assets/1logo.png";
 import "./AdminAnnouncements.css";
 
-const SAMPLE_ANNOUNCEMENTS = [
-  {
-    id: 1,
-    title: "New peer feedback improvements",
-    message:
-      "Peer feedback now supports inline comments, better sorting, and admin moderation features.",
-    date: "Nov 24, 2025",
-    createdAt: Date.now() - 86400000 * 7
-  },
-  {
-    id: 2,
-    title: "Server maintenance tonight",
-    message:
-      "We'll be bringing the platform down for a quick maintenance window at 11:45 PM. Expect ~15 minutes downtime.",
-    date: "Nov 30, 2025",
-    createdAt: Date.now() - 86400000 * 2
-  }
-];
+const API_BASE = "http://192.168.100.180:5001";
+
 
 export default function AdminAnnouncements() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dark, setDark] = useState(true);
 
-  const [announcements, setAnnouncements] = useState(SAMPLE_ANNOUNCEMENTS);
+  const [announcements, setAnnouncements] = useState([]);
+
   const [query, setQuery] = useState("");
   const [sortDir, setSortDir] = useState("desc");
 
   const [modal, setModal] = useState(null);
-  const [form, setForm] = useState({ title: "", message: "", date: "" });
+  const [form, setForm] = useState({
+    id: "",
+    title: "",
+    body: "",
+    category: "info",
+  });
 
+  const [saving, setSaving] = useState(false);
+
+  /* =====================================================
+     CHECK ADMIN LOGIN
+  ===================================================== */
+  useEffect(() => {
+    if (localStorage.getItem("admin_logged_in") !== "true") {
+      window.location.href = "/login";
+    }
+  }, []);
+
+  /* =====================================================
+     DARK MODE
+  ===================================================== */
   useEffect(() => {
     document.documentElement.classList.toggle("admin-dark", dark);
   }, [dark]);
 
+  /* =====================================================
+     LOAD ALL ANNOUNCEMENTS
+  ===================================================== */
+  const loadAnnouncements = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/announcements`);
+
+      if (!res.ok) throw new Error("Failed to load announcements");
+      const data = await res.json();
+      setAnnouncements(data.announcements || []);
+    } catch (err) {
+      console.error("Failed loading announcements:", err);
+      setAnnouncements([]);
+    }
+  };
+
+  useEffect(() => {
+    loadAnnouncements();
+  }, []);
+
+  /* =====================================================
+     SEARCH + SORT
+  ===================================================== */
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
+
     return announcements
       .filter(
         (a) =>
           a.title.toLowerCase().includes(q) ||
-          a.message.toLowerCase().includes(q) ||
-          a.date.toLowerCase().includes(q)
+          a.body.toLowerCase().includes(q)
       )
       .sort((a, b) =>
-        sortDir === "desc" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+        sortDir === "desc"
+          ? new Date(b.created_at) - new Date(a.created_at)
+          : new Date(a.created_at) - new Date(b.created_at)
       );
   }, [announcements, query, sortDir]);
 
+  /* =====================================================
+     OPEN MODAL HELPERS
+  ===================================================== */
   const openCreate = () => {
-    setForm({ title: "", message: "", date: new Date().toLocaleDateString() });
+    setForm({ id: "", title: "", body: "", category: "info" });
     setModal({ mode: "create" });
   };
 
-  const openView = (item) => setModal({ mode: "view", data: item });
+  const openView = (a) => setModal({ mode: "view", data: a });
 
-  const openEdit = (item) => {
-    setForm(item);
-    setModal({ mode: "edit", data: item });
+  const openEdit = (a) => {
+    setForm({
+      id: a.id,
+      title: a.title,
+      body: a.body,
+      category: a.category || "info",
+    });
+    setModal({ mode: "edit", data: a });
   };
 
-  const createAnnouncement = () => {
-    if (!form.title.trim()) return alert("Title is required.");
-    setAnnouncements((prev) => [
-      { ...form, id: Date.now(), createdAt: Date.now() },
-      ...prev
-    ]);
-    setModal(null);
+  const openDelete = (a) => setModal({ mode: "delete", data: a });
+
+  /* =====================================================
+     CREATE ANNOUNCEMENT
+  ===================================================== */
+  const createAnnouncement = async () => {
+    if (!form.title.trim()) return alert("Title required.");
+    if (!form.body.trim()) return alert("Message required.");
+
+    try {
+      setSaving(true);
+
+      const res = await fetch(`${API_BASE}/api/announcements`, {
+
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          body: form.body.trim(),
+          category: form.category,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Failed to create announcement");
+        return;
+      }
+
+      setAnnouncements((prev) => [
+        {
+          id: data.id,
+          title: form.title.trim(),
+          body: form.body.trim(),
+          category: form.category,
+          is_new: 1,
+          created_at: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+
+      setModal(null);
+    } catch (err) {
+      console.error("Create error:", err);
+      alert("Server error while creating announcement");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const saveEdit = () => {
-    setAnnouncements((prev) =>
-      prev.map((a) => (a.id === form.id ? form : a))
-    );
-    setModal(null);
+  /* =====================================================
+     SAVE EDIT
+  ===================================================== */
+  const saveEdit = async () => {
+    if (!form.title.trim()) return alert("Title required.");
+    if (!form.body.trim()) return alert("Message required.");
+
+    try {
+      setSaving(true);
+
+      const res = await fetch(`${API_BASE}/api/announcements/${form.id}`, {
+
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          body: form.body.trim(),
+          category: form.category,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Failed to update announcement");
+        return;
+      }
+
+      setAnnouncements((prev) =>
+        prev.map((a) =>
+          a.id === form.id
+            ? {
+                ...a,
+                title: form.title.trim(),
+                body: form.body.trim(),
+                category: form.category,
+                is_new: 1,
+              }
+            : a
+        )
+      );
+
+      setModal(null);
+    } catch (err) {
+      console.error("Edit error:", err);
+      alert("Server error while updating");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const deleteAnn = (item) => setModal({ mode: "delete", data: item });
+  /* =====================================================
+     DELETE ANNOUNCEMENT
+  ===================================================== */
+  const confirmDelete = async () => {
+    try {
+      setSaving(true);
 
-  const confirmDelete = () => {
-    setAnnouncements((prev) => prev.filter((a) => a.id !== modal.data.id));
-    setModal(null);
+      const res = await fetch(
+        `${API_BASE}/api/announcements/${modal.data.id}`,
+
+        { method: "DELETE" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Failed to delete announcement");
+        return;
+      }
+
+      setAnnouncements((prev) =>
+        prev.filter((a) => a.id !== modal.data.id)
+      );
+
+      setModal(null);
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Server error while deleting");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+  const handleLogout = () => {
+    localStorage.removeItem("admin_logged_in");
+    window.location.href = "/login";
   };
 
   return (
     <div className={`admin-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      {sidebarCollapsed && (
+        <button
+          className="sidebar-open-btn"
+          onClick={() => setSidebarCollapsed(false)}
+        >
+          <FaBars />
+        </button>
+      )}
+
       {/* SIDEBAR */}
       <aside className="sidebar">
-        <div className="sidebar-header">
-          <img src={logo} className="sidebar-logo" alt="logo" />
-          {!sidebarCollapsed && <span className="sidebar-title">EduVerso Admin</span>}
+        <div className="sidebar-top">
+          <div className="sidebar-header">
+            <img src={logo} className="sidebar-logo" alt="logo" />
+            <span className="sidebar-title">EduVerso Admin</span>
+          </div>
 
           <button
             className="sidebar-collapse-btn"
@@ -126,53 +295,65 @@ export default function AdminAnnouncements() {
 
         <ul className="sidebar-menu">
           <li onClick={() => (window.location.href = "/dashboard")}>
-            <LuLayoutDashboard />
-            {!sidebarCollapsed && <span>Dashboard</span>}
+            <LuLayoutDashboard className="menu-icon" /> Dashboard
           </li>
 
           <li onClick={() => (window.location.href = "/students")}>
-            <LuUsers /> {!sidebarCollapsed && <span>Students</span>}
+            <LuUsers className="menu-icon" /> Students
           </li>
 
           <li onClick={() => (window.location.href = "/admin-modules")}>
-            <LuBookOpen /> {!sidebarCollapsed && <span>Modules</span>}
+            <LuBookOpen className="menu-icon" /> Modules
           </li>
 
-          <li>
-            <LuBrain /> {!sidebarCollapsed && <span>Quiz Arena</span>}
+          {/* ✅ GAMES ARENA ADDED */}
+          <li onClick={() => (window.location.href = "/admin-games")}>
+            <LuGamepad2 className="menu-icon" /> Games Arena
           </li>
 
           <li onClick={() => (window.location.href = "/admin-peerfeedback")}>
-            <LuMessageSquare /> {!sidebarCollapsed && <span>Peer Feedback</span>}
+            <LuMessageSquare className="menu-icon" /> Peer Feedback
           </li>
 
           <li className="active">
-            <LuMegaphone /> {!sidebarCollapsed && <span>Announcements</span>}
-          </li>
-
-          <li onClick={() => (window.location.href = "/settings")}>
-            <LuSettings /> {!sidebarCollapsed && <span>Settings</span>}
+            <LuMegaphone className="menu-icon" /> Announcements
           </li>
 
           <div className="spacer"></div>
 
-          <li className="logout">
-            <LuLogOut /> {!sidebarCollapsed && <span>Logout</span>}
+          <li onClick={() => (window.location.href = "/admin-settings")}>
+            <LuSettings className="menu-icon" /> Settings
+          </li>
+
+          <li className="logout" onClick={handleLogout}>
+            <LuLogOut className="menu-icon" /> Logout
           </li>
         </ul>
       </aside>
 
       {/* MAIN CONTENT */}
       <main className="admin-ann-container">
-        <div className="ann-header">
-          <div className="ann-left">
-            <h1 className="ann-main-title">📢 Admin Announcements</h1>
-            <p className="ann-sub">Create, manage, and view platform announcements</p>
-          </div>
+        <div className="ann-main-box-dashboard">
+          {/* HEADER */}
+          <div className="ann-header">
+            <div className="ann-top-row">
+              <h1 className="ann-main-title">📢 Admin Announcements</h1>
 
-          {/* CONTROLS BELOW TITLE */}
-          <div className="ann-controls-row">
-            <div className="ann-controls">
+              <div className="ann-icons-right">
+                <button className="icon-btn" onClick={() => setDark(!dark)}>
+                  {dark ? <FaMoon /> : <FaSun />}
+                </button>
+                <button className="icon-btn">
+                  <FaBell />
+                </button>
+              </div>
+            </div>
+
+            <p className="ann-sub">
+              Create, manage, and broadcast announcements
+            </p>
+
+            <div className="ann-controls under-title">
               <div className="ann-search">
                 <FaSearch />
                 <input
@@ -194,44 +375,45 @@ export default function AdminAnnouncements() {
               <button className="btn add" onClick={openCreate}>
                 <FaPlus /> Add Announcement
               </button>
-
-              <button className="icon-btn" onClick={() => setDark(!dark)}>
-                {dark ? <FaMoon /> : <FaSun />}
-              </button>
-
-              <button className="icon-btn">
-                <FaBell />
-              </button>
             </div>
           </div>
-        </div>
 
-        {/* ANNOUNCEMENT LIST */}
-        <div className="ann-list">
-          {filtered.map((a) => (
-            <div className="ann-card" key={a.id}>
-              <div className="ann-card-top">
-                <div className="ann-title-left">
-                  <h3 className="ann-title">{a.title}</h3>
-                  <p className="ann-meta">{a.date}</p>
+          {/* ANNOUNCEMENTS LIST */}
+          <div className="ann-list">
+            {filtered.map((a) => (
+              <div className="ann-card" key={a.id}>
+                <div className="ann-card-top">
+                  <div>
+                    <h3 className="ann-title">{a.title}</h3>
+                    <p className="ann-meta">
+                      {new Date(a.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="ann-actions">
+                    <button className="icon" onClick={() => openView(a)}>
+                      <FaEye />
+                    </button>
+                    <button className="icon" onClick={() => openEdit(a)}>
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="icon danger"
+                      onClick={() => openDelete(a)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="ann-actions">
-                  <button className="icon" onClick={() => openView(a)}>
-                    <FaEye />
-                  </button>
-                  <button className="icon" onClick={() => openEdit(a)}>
-                    <FaEdit />
-                  </button>
-                  <button className="icon danger" onClick={() => deleteAnn(a)}>
-                    <FaTrash />
-                  </button>
-                </div>
+                <p className="ann-message">{a.body}</p>
               </div>
+            ))}
 
-              <p className="ann-message">{a.message}</p>
-            </div>
-          ))}
+            {filtered.length === 0 && (
+              <p className="ann-empty">No announcements yet.</p>
+            )}
+          </div>
         </div>
       </main>
 
@@ -240,11 +422,17 @@ export default function AdminAnnouncements() {
         <div className="ann-modal-backdrop" onClick={() => setModal(null)}>
           <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
             <h2>{modal.data.title}</h2>
-            <p className="ann-meta">{modal.data.date}</p>
-            <p style={{ marginTop: 12, lineHeight: 1.6 }}>{modal.data.message}</p>
+            <p className="ann-meta">
+              {new Date(modal.data.created_at).toLocaleDateString()}
+            </p>
+
+            <p style={{ marginTop: 12 }}>{modal.data.body}</p>
 
             <div className="ann-modal-actions">
-              <button className="btn" onClick={() => setModal(null)}>Close</button>
+              <button className="btn" onClick={() => setModal(null)}>
+                Close
+              </button>
+
               <button className="btn add" onClick={() => openEdit(modal.data)}>
                 <FaEdit /> Edit
               </button>
@@ -257,40 +445,72 @@ export default function AdminAnnouncements() {
       {(modal?.mode === "create" || modal?.mode === "edit") && (
         <div className="ann-modal-backdrop" onClick={() => setModal(null)}>
           <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{modal.mode === "create" ? "New Announcement" : "Edit Announcement"}</h2>
+            <h2>
+              {modal.mode === "create"
+                ? "New Announcement"
+                : "Edit Announcement"}
+            </h2>
 
+            {/* Title */}
             <div className="field">
               <label>Title</label>
               <input
                 value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, title: e.target.value })
+                }
               />
             </div>
 
+            {/* Category */}
             <div className="field">
-              <label>Date</label>
-              <input
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
+              <label>Category</label>
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
+              >
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="update">Update</option>
+              </select>
             </div>
 
+            {/* Body */}
             <div className="field">
               <label>Message</label>
               <textarea
                 rows="5"
-                value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                value={form.body}
+                onChange={(e) =>
+                  setForm({ ...form, body: e.target.value })
+                }
               />
             </div>
 
+            {/* BUTTONS */}
             <div className="ann-modal-actions">
-              <button className="btn" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn" onClick={() => setModal(null)}>
+                Cancel
+              </button>
 
               {modal.mode === "create" ? (
-                <button className="btn add" onClick={createAnnouncement}>Create</button>
+                <button
+                  className="btn add"
+                  onClick={createAnnouncement}
+                  disabled={saving}
+                >
+                  {saving ? "Creating..." : "Create"}
+                </button>
               ) : (
-                <button className="btn add" onClick={saveEdit}>Save</button>
+                <button
+                  className="btn add"
+                  onClick={saveEdit}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
               )}
             </div>
           </div>
@@ -305,9 +525,16 @@ export default function AdminAnnouncements() {
             <p className="ann-sub">This action cannot be undone.</p>
 
             <div className="ann-modal-actions">
-              <button className="btn" onClick={() => setModal(null)}>Cancel</button>
-              <button className="btn danger" onClick={confirmDelete}>
-                <FaTrash /> Delete
+              <button className="btn" onClick={() => setModal(null)}>
+                Cancel
+              </button>
+
+              <button
+                className="btn danger"
+                onClick={confirmDelete}
+                disabled={saving}
+              >
+                <FaTrash /> {saving ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

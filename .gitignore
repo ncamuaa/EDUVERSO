@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Expo
+.expo/
+
+# Dependencies
+node_modules/
+
+# Large assets
+*.pdf
+src/assets/modules/

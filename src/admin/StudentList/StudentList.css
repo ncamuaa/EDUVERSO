@@ -1,257 +1,304 @@
-/* ============================================================
+/* =========================================================
    THEME
-============================================================ */
+========================================================= */
 :root {
-  --bg-a: #2b1a7f;
-  --bg-b: #4b2bd6;
-  --card: rgba(24, 14, 80, 0.85);
-  --border: rgba(255, 255, 255, 0.06);
-  --text: #e8e6ff;
-  --muted: rgba(255, 255, 255, 0.36);
-  --accent: #22c55e;
+  --stu-bg-a: #0d0b52;
+  --stu-bg-b: #5a2dfd;
+  --stu-card: rgba(24, 14, 80, 0.85);
+  --stu-border: rgba(255, 255, 255, 0.08);
+  --stu-text: #e8e6ff;
+  --stu-muted: rgba(255, 255, 255, 0.45);
+  --stu-accent: #8f63ff;
 }
 
-/* ============================================================
-   BASE LAYOUT
-============================================================ */
-html, body {
-  margin: 0;
+/* =========================================================
+   BACKGROUND
+========================================================= */
+html.admin-dark,
+body.admin-dark {
   height: 100%;
+  background: linear-gradient(135deg, var(--stu-bg-a), var(--stu-bg-b));
+  color: var(--stu-text);
   font-family: Poppins, sans-serif;
-  background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
-  color: var(--text);
-  overflow: hidden;
 }
 
-.admin-layout {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* ============================================================
-   SIDEBAR
-============================================================ */
-.sidebar {
-  width: 260px;
-  min-width: 260px;
-  padding: 22px;
-  background: linear-gradient(180deg, #0a0828ee, #1a1050ee);
-  display: flex;
-  flex-direction: column;
-  transition: width 260ms ease, padding 260ms ease;
-  z-index: 900;
-}
-
-.sidebar-collapsed .sidebar {
-  width: 80px;
-  min-width: 80px;
-  padding-left: 12px;
-  padding-right: 8px;
-}
-
-/* ============================================================
-   RIGHT WRAPPER — controls width so scrollbar stays at far right
-============================================================ */
-.right-wrapper {
-  width: calc(100vw - 260px);
-  transition: width 260ms ease;
-  overflow: hidden;
-}
-
-.sidebar-collapsed .right-wrapper {
-  width: calc(100vw - 80px);
-}
-
-/* ============================================================
-   MAIN CONTENT
-============================================================ */
-.main-content {
+/* =========================================================
+   LAYOUT
+========================================================= */
+.stu-admin-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
   width: 100%;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+}
+
+.stu-admin-layout.stu-sidebar-collapsed {
+  grid-template-columns: 0 1fr !important;
+}
+
+.stu-admin-layout.stu-sidebar-collapsed .stu-sidebar {
+  transform: translateX(-260px);
+  pointer-events: none;
+}
+
+/* =========================================================
+   SIDEBAR (MATCHES SETTINGS)
+========================================================= */
+.stu-sidebar {
+  width: 260px;
+  padding: 18px;
+  background: rgba(10, 15, 50, 0.55);
+  backdrop-filter: blur(14px);
+  border-right: 1px solid var(--stu-border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease;
+  z-index: 90;
   box-sizing: border-box;
-  padding: 20px 26px;
 }
 
-.main-content::-webkit-scrollbar {
-  width: 12px;
+.stu-sidebar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.main-content::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.18);
-  border-radius: 10px;
+.stu-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Outer bordered box */
-.main-content-box {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+.stu-sidebar-logo {
+  width: 45px;
+  height: 45px;
+}
+
+.stu-sidebar-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--stu-text);
+}
+
+.stu-sidebar-collapse-btn {
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--stu-border);
+  cursor: pointer;
+  color: var(--stu-text);
+}
+
+/* =========================================================
+   SIDEBAR MENU
+========================================================= */
+.stu-sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stu-sidebar-menu li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--stu-text);
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+
+.stu-sidebar-menu li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ✅ SETTINGS-STYLE ACTIVE */
+.stu-sidebar-menu li.active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Icons & text */
+.stu-menu-icon {
+  font-size: 1.3rem;
+}
+
+.stu-menu-text {
+  color: var(--stu-text);
+}
+
+/* Logout (matches Settings emphasis) */
+.stu-sidebar-menu li.logout {
+  background: rgba(255, 80, 80, 0.12);
+  color: #ffb3b3;
+}
+
+/* Spacer */
+.stu-spacer {
+  flex: 1;
+}
+
+/* Floating open button */
+.stu-sidebar-open-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(15, 18, 40, 0.9);
+  border: 1px solid var(--stu-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--stu-text);
+  z-index: 999;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+.stu-main {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 30px;
+  box-sizing: border-box;
+}
+
+.stu-main-glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
   padding: 28px;
-  box-shadow: 0 0 45px rgba(0,0,0,0.25);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(14px);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* ============================================================
-   HEADER + SEARCH CONTROLS
-============================================================ */
-.back-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 10px 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  color: var(--text);
+.stu-main-inner {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 14px 0;
-}
-
-.top-controls {
+/* =========================================================
+   HEADER
+========================================================= */
+.stu-header-row {
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 18px;
 }
 
-.search-input,
-.sort-select {
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 15px;
+.stu-back-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--stu-text);
+  cursor: pointer;
 }
 
-/* ============================================================
-   STATS ROW
-============================================================ */
-.stats-row {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 26px;
-}
-
-.stat-box {
-  background: rgba(255,255,255,0.07);
-  padding: 20px 26px;
-  min-width: 180px;
-  border-radius: 16px;
-  text-align: center;
-}
-
-.stat-title {
-  font-size: 15px;
-  color: var(--muted);
-}
-
-.stat-value {
-  margin-top: 6px;
-  font-size: 26px;
+.stu-title {
+  font-size: 24px;
   font-weight: 700;
+  margin-left: 10px;
 }
 
-/* ============================================================
-   GRID — 4 per row forced
-============================================================ */
-/* GRID — 4 columns with clean spacing */
-.student-grid {
+.stu-subtitle {
+  margin-top: 6px;
+  color: var(--stu-muted);
+}
+
+.stu-header-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stu-search-input,
+.stu-sort-select {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--stu-border);
+  color: var(--stu-text);
+}
+
+/* =========================================================
+   STUDENTS GRID
+========================================================= */
+.stu-student-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px;                  /* spacing between cards */
-  padding: 10px 0;
-  width: 100%;
-  box-sizing: border-box;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  padding: 6px 0;
 }
 
-/* CARD — restored original look */
-.student-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 22px;
-  border-radius: 18px;
-  text-align: center;
+.stu-student-card {
+  background: var(--stu-card);
+  border: 1px solid var(--stu-border);
+  padding: 18px;
+  border-radius: 14px;
   box-shadow: 0 10px 30px rgba(12, 9, 46, 0.28);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: transform 0.18s cubic-bezier(.2,.9,.2,1),
-              box-shadow 0.18s;
 }
 
-/* Hover effect */
-.student-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 36px rgba(12, 9, 46, 0.36);
-}
-
-/* Image — back to original size */
-.student-img {
+.stu-card-media img {
   width: 100%;
-  height: 260px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
-/* Text */
-.student-name {
-  margin-top: 6px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.student-stats {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-/* Buttons */
-.card-actions {
+/* =========================================================
+   ACTIONS
+========================================================= */
+.stu-card-actions {
   margin-top: auto;
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-
-.btn {
-  padding: 10px 18px;
+.stu-btn {
+  padding: 10px 16px;
   border-radius: 10px;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
 }
 
-.btn.ghost {
-  background: rgba(255,255,255,0.12);
-  color: var(--text);
+.stu-btn.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--stu-text);
 }
 
-.btn.main {
-  background: var(--accent);
-  color: white;
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+.stu-empty {
+  color: var(--stu-muted);
+  grid-column: 1 / -1;
+  text-align: center;
 }
 
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-@media (max-width: 1400px) {
-  .student-grid { grid-template-columns: repeat(3, 1fr) !important; }
-}
-
-@media (max-width: 1000px) {
-  .student-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
-
-@media (max-width: 600px) {
-  .sidebar { display: none; }
-  .right-wrapper { width: 100vw; }
-  .student-grid { grid-template-columns: 1fr !important; }
+/* =========================================================
+   COLLAPSED SIDEBAR – FULL WIDTH CONTENT
+========================================================= */
+.stu-admin-layout.stu-sidebar-collapsed .stu-main-glass,
+.stu-admin-layout.stu-sidebar-collapsed .stu-main-inner,
+.stu-admin-layout.stu-sidebar-collapsed .stu-student-grid {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
 }
