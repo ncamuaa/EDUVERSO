@@ -31,3 +31,4 @@ node_modules/
 # Large assets
 *.pdf
 src/assets/modules/
+.vercel

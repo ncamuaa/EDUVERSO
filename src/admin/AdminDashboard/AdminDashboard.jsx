@@ -36,7 +36,6 @@ import "./AdminDashboard.css";
 
 const API_BASE = "http://192.168.100.180:5001";
 
-
 const safe = (v) => (Number.isFinite(v) ? v : 0);
 
 export default function AdminDashboard() {
