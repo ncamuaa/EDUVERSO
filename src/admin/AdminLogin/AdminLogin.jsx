@@ -17,11 +17,15 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5001/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),  // FIXED: send email, not username
-      });
+     const response = await fetch(
+  "https://eduversooo-production-4eaf.up.railway.app/api/auth/login",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  }
+);
+
 
       const data = await response.json();
 
